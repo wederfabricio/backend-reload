@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  mysql:
+    image: 'mysql:8'
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_DATABASE=my_database
+      - MYSQL_ROOT_PASSWORD=my_password
+  myapp:
+    tty: true
+    image: php:7.4-cli
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_PASSWORD=${DB_PASSWORD}
+    ports:
+      - 3000:3000
+    command: bash -c "apt-get update && apt-get install -y curl zip unzip libfreetype6-dev libjpeg62-turbo-dev libmcrypt-dev libpng-dev zlib1g-dev libxml2-dev libzip-dev libonig-dev graphviz ; docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd; curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer;php /usr/bin/composer install;chmod -R 777 .;php artisan migrate;php artisan storage:link;php artisan db:seed;php artisan serve --host=0.0.0.0 --port=3000"
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - ./php.ini:/usr/local/etc/php/php.ini
